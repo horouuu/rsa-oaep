@@ -17,12 +17,12 @@ def mask(maskLen: int, seed: bytes):
 
     return bytes(M[:maskLen])
 
+# helper function for bitwise XOR
 def xor_bytes(a, b):
     if len(a) != len(b):
         raise ValueError("Length of byte strings a and b must be the same.")
 
     return bytes(x ^ y for x, y in zip(a, b))
-    
 
 def pad_oaep(message: bytes):
     msg_len = len(message)

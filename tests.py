@@ -39,9 +39,29 @@ def test_oaep_randomness():
     print("SUCCESS: Randomness")
     print_separator()
 
+def test_oaep_shape():
+    print_separator()
+    print('Running EME-OAEP five times with message "Konpeko"')
+    inp = "Konpeko".encode("utf-8")
+    res = [pad_oaep(inp) for _ in range(5)]
+    for i, padded in enumerate(res):
+        print(f"Padded {i + 1}:", padded)
+
+    len_1 = len(res[0])
+    if any(len(p) != len_1 for p in res):
+        raise AssertionError("Produced padded messages of different lengths.")
+
+    print(f"Produced uniform-length padded messages of length {len_1} bytes")
+    print("SUCCESS: Shape")
+    print_separator()
+
 def test_oaep():
     print("STARTING TESTS FOR OAEP")
     test_oaep_correctness()
     test_oaep_randomness()
+    test_oaep_shape()
+
+    print("OAEP: Passed all tests")
+    print_separator()
 
 test_oaep()

@@ -65,14 +65,3 @@ def unpad_oaep(padded_msg: bytes):
         raise ValueError("Received different label hashes")
 
     return db[msg_idx+1:]
-
-
-def test_oaep():
-    print('Running EME-OAEP with message "HELLO"')
-    inp = bytes("HELLO", 'utf-8')
-    padded = pad_oaep(inp)
-    print('Padded: ', padded)
-    decoded = unpad_oaep(padded).decode('utf-8')
-    print('Decoded: ', decoded)
-
-test_oaep()

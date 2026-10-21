@@ -65,3 +65,39 @@ def test_oaep():
     print_separator()
 
 test_oaep()
+
+
+from primes import get_mr_rounds
+
+def test_primes_nist_table():
+    print_separator()
+    rsa_2048_1 = (1024, 2**-100, 4)
+    rsa_2048_2 = (1024, 2**-112, 5)
+    rsa_3072_1 = (1536, 2**-100, 3)
+    rsa_3072_2 = (1536, 2**-128, 4)
+    rsa_4096_1 = (2048, 2**-100, 2)
+    rsa_4096_2 = (2048, 2**-144, 4)
+
+    checks = [rsa_2048_1, rsa_2048_2, rsa_3072_1, rsa_3072_2, rsa_4096_1, rsa_4096_2]
+    print("Testing against NIST standards:")
+    for c in checks:
+        print(f"RSA{c[0]*2} - {str(c[1])} error probability")
+
+    print()
+    for c in checks:
+        calced = get_mr_rounds(c[0], c[1])
+        print(f"Calculated rounds needed for RSA{c[0]*2}: {calced}")
+        print(f"NIST table says: {c[2]} rounds")
+        print()
+        if (calced != c[2]):
+            raise AssertionError(f"Rounds calculator returned {calced}, NIST table says {c[2]}")
+
+    print("SUCCESS: NIST Table Sanity Check")
+    print_separator()
+
+def test_primes():
+    test_primes_nist_table()
+    print("Primes: Passed all tests")
+    print_separator()
+
+test_primes()

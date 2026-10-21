@@ -26,6 +26,7 @@ The `secrets` library in Python will be used to securely generate random numbers
 In RSA2048, prime candidates $p$ and $q$ are 1024-bit integers.
 ### Pertaining to Generation of Key Pairs (A.1.1) of NIST FIPS 186-5
 1. This implementation will use the method of "probable primes" to generate its primes $p$ and $q$.
+    - The Miller-Rabin test is used to test the primality of prime candidates.
 ### Pertaining to IFC Key Standards (A.1.1) of NIST FIPS 186-5
 1. The public exponent $e$ shall be the value $2^{16} + 1$, or $65537$.
     - This number satisfies the NIST standard range for $e$, namely $2^{16} < e < 2^{256}$.
@@ -42,3 +43,6 @@ In RSA2048, prime candidates $p$ and $q$ are 1024-bit integers.
 2. The value for `lHash` will be hard coded as `(0x)e3b0c442 98fc1c14 9afbf4c8 996fb924 27ae41e4 649b934c a495991b 7852b855` (SHA256).
     - This is done to simplify the implementation of RSAES-OAEP.
 3. The chosen MGF is MGF1.
+
+## Miscellaneous
+List of Mersenne primes taken from [mersenne.org](https://www.mersenne.org/primes/)

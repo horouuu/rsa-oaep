@@ -68,6 +68,7 @@ test_oaep()
 
 
 from primes import get_mr_rounds
+from primes import test_mr
 
 def test_primes_nist_table():
     print_separator()
@@ -92,11 +93,34 @@ def test_primes_nist_table():
         if (calced != c[2]):
             raise AssertionError(f"Rounds calculator returned {calced}, NIST table says {c[2]}")
 
-    print("SUCCESS: NIST Table Sanity Check")
+    print("SUCCESS: NIST table sanity check")
+    print_separator()
+
+def test_primes_even():
+    print_separator()
+    print("Testing primality of numbers 2^1024 to 2^1124...")
+    for i in range(101):
+        n = 2**(1024 + i)
+        res = test_mr(n, 2**-100)
+        if (res): raise AssertionError(f"Power of 2 {n}^{i} marked prime by MR test.")
+
+    print("SUCCESS: 2^1024 to 2^1124 all marked as composite")
+    print_separator()
+
+def test_primes_mersenne():
+    print_separator()
+    print("Testing Mersenne primes 15 to 25 [2^1279-1, 2^21701-1]...")
+    nums = [2**1279-1, 2**2203-1, 2**2281-1, 2**3217-1, 2**4253-1, 2**9689-1, 2**9941-1, 2**11213-1, 2**19937-1, 2**21701-1]
+    for i, num in enumerate(nums):
+        res = test_mr(num, 2**-100)
+        if (not res): raise AssertionError(f"Mersenne number #{15 + i} (idx {i}) marked as composite by MR test.")
+    print("SUCCESS: Mersenne primes 15 to 25 all marked as prime by MR test ")
     print_separator()
 
 def test_primes():
     test_primes_nist_table()
+    test_primes_even()
+    test_primes_mersenne()
     print("Primes: Passed all tests")
     print_separator()
 

@@ -33,7 +33,7 @@ if __name__ == '__main__':
         t = time.perf_counter()
         print(f"Generating {iterations} key pairs for RSA{var}...")
         with Pool(16) as pool:
-            primes = pool.map(gen_test_pairs, [int(var)] * iterations)
+            primes = pool.map(gen_test_pairs, [int(var)] * int(iterations))
         primes = [x for sublist in primes for x in sublist]
         t = time.perf_counter() - t
         print(f"Generated {iterations} pairs of RSA{var} keys in {round(t, 2)} seconds.\n")

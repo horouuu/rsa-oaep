@@ -4,13 +4,11 @@ import time
 from lib.primes import test_mr
 from lib.primes import test_composite_small_primes
 
-verbose = False
-key_len = 2048
-
 class RSA:
     def __init__(self, verbose=False, key_len=2048):
         self.verbose = verbose
         self.key_len = key_len
+        self.e = 2**16 + 1
 
     def print_log(self, msg: str, newline: bool=False):
         if (self.verbose):
@@ -25,6 +23,10 @@ class RSA:
         while True:
             att += 1
             candidate: int = self.gen_bits(bits)
+            if ((candidate-1) % self.e == 0):
+                self.print_log(f"(candidate - 1) failed co-primality with public exponent e={self.e}")
+                continue
+
             if (test_composite_small_primes(candidate)):
                 self.print_log("Candidate is found to be divisible by a small prime < 100, continuing..")
                 continue

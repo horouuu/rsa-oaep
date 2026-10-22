@@ -28,7 +28,7 @@ class RSA:
                 continue
 
             if (test_composite_small_primes(candidate)):
-                self.print_log("Candidate is found to be divisible by a small prime < 100, continuing..")
+                self.print_log("Candidate is found to be divisible by a small prime < 542, continuing..")
                 continue
 
             if (test_mr(candidate, 2**-100)):

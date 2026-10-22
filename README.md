@@ -21,13 +21,13 @@
 4. (B.2.1) MGF1
     - MGF1 will be implemented as dictated in Appendix B of RFC 8017.
 
-## Implementation Details
+## 1. Implementation Details
 The `secrets` library in Python will be used to securely generate random numbers.
 In RSA2048, prime candidates $p$ and $q$ are 1024-bit integers.
-### Pertaining to Generation of Key Pairs (A.1.1) of NIST FIPS 186-5
+### 1.1 Pertaining to Generation of Key Pairs (A.1.1) of NIST FIPS 186-5
 1. This implementation will use the method of "probable primes" to generate its primes $p$ and $q$.
     - The Miller-Rabin test is used to test the primality of prime candidates.
-### Pertaining to IFC Key Standards (A.1.1) of NIST FIPS 186-5
+### 1.2 Pertaining to IFC Key Standards (A.1.1) of NIST FIPS 186-5
 1. The public exponent $e$ shall be the value $2^{16} + 1$, or $65537$.
     - This number satisfies the NIST standard range for $e$, namely $2^{16} < e < 2^{256}$.
     - This number has a very low hamming weight of $HW(65537) = 2$.
@@ -38,11 +38,20 @@ In RSA2048, prime candidates $p$ and $q$ are 1024-bit integers.
     - Together, they make up $1.5\cdot2^{\frac{nlen}{2}-1} > \sqrt{2}\cdot2^{\frac{nlen}{2}-1}$ 
 
 3. The right-most bit of $p$ and $q$ condidates will be set to 1 to ensure that the number is odd.
-### Pertaining to RFC 8017
+### 1.3 Pertaining to RFC 8017
 1. The chosen hash function is SHA256.
 2. The value for `lHash` will be hard coded as `(0x)e3b0c442 98fc1c14 9afbf4c8 996fb924 27ae41e4 649b934c a495991b 7852b855` (SHA256).
     - This is done to simplify the implementation of RSAES-OAEP.
 3. The chosen MGF is MGF1.
+
+## 2. Mechanism of Random Prime Generation
+The mechanism is roughly as follows:
+1. A random number of length `k` is generated using `secrets.randbits`.
+2. The first two bits of the number is set to 1, along with the LSB, as detailed in [section 1.2](#pertaining-to-ifc-key-standards-a11-of-nist-fips-186-5).
+3. The number is divided by 5 and rejected if the modulo returns 0.
+4. The number is divided by the first 100 prime numbers and rejected if the modulo returns 0.
+5. The number is passed through the Miller-Rabin test.
+6. If accepted, then the number is used as a prime candidate.
 
 ## Miscellaneous
 List of Mersenne primes taken from [mersenne.org](https://www.mersenne.org/primes/)

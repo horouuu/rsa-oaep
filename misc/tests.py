@@ -1,5 +1,5 @@
-from oaep import pad_oaep
-from oaep import unpad_oaep
+from lib.oaep import pad_oaep
+from lib.oaep import unpad_oaep
 
 def print_separator():
     print("------------------------------------------")
@@ -67,8 +67,8 @@ def test_oaep():
 test_oaep()
 
 
-from primes import get_mr_rounds
-from primes import test_mr
+from lib.primes import get_mr_rounds
+from lib.primes import test_mr
 
 def test_primes_nist_table():
     print_separator()

@@ -45,5 +45,5 @@ class RSA:
         t = time.perf_counter()
         primes = list(map(self.get_prime, lens))
         t = time.perf_counter() - t
-        self.print_log(f"Took {round(t, 2)} to generate prime pairs p and q.")
+        self.print_log(f"Took {round(t, 2)}s to generate prime pairs p and q.")
         return primes

@@ -25,10 +25,6 @@ class RSA:
         while True:
             att += 1
             candidate: int = self.gen_bits(bits)
-            if (candidate % 5 == 0):
-                self.print_log("Candidate is divisible by 5, continuing..")
-                continue
-
             if (test_composite_small_primes(candidate)):
                 self.print_log("Candidate is found to be divisible by a small prime < 100, continuing..")
                 continue

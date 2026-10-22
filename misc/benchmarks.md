@@ -14,7 +14,7 @@ The following is a table of how fast generating 1000 pairs with 16 CPU cores too
 
 The table was generated using the `misc/gen_primes.py` function with the following commands:
 > `py -m misc.gen_primes 1000 512 768 1024 2048 3072 4096`
-> `py -m misc.avg_primes 1 512 768 1024 2048 3072 4096 8192`
+> `py -m misc.gen_primes 1 512 768 1024 2048 3072 4096 8192`
 
 The 1-core statistics are an average of 10 executions.
 

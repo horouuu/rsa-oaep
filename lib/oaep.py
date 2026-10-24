@@ -24,9 +24,8 @@ def _xor_bytes(a, b):
 
     return bytes(x ^ y for x, y in zip(a, b))
 
-def pad_oaep(message: bytes):
+def pad_oaep(message: bytes, out_len: bytes):
     msg_len = len(message)
-    out_len = 256 # bytes
     hash_len = 32
     if (msg_len > out_len - hash_len*2 - 2):
         raise ValueError("Message length too long.")

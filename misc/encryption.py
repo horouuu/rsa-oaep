@@ -7,7 +7,7 @@ def benchmark_encryption(modulus_len):
     
     rsa = RSA().key_len(modulus_len).initialize_rsa()
 
-    iter = 100000
+    iter = 1000
 
     t = time.perf_counter()
     for _ in range(iter):

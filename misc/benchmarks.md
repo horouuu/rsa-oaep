@@ -49,5 +49,11 @@ The above shows that the encryption time is virtually nothing compared to the de
 Use the following command to repeat this experiment:
 > `py -m misc.encryption`
 
-## 5. Wiener Attack
+## 5. Wiener's attack
 -
+
+## 6. PEM serialization and compatibility with OpenSSL
+-
+
+## 7. Possible vectors for timing attack against RSAES using different modulus lengths
+As seen in [3](#3-decryption-with-crt-vs-basic-modulo-exponentiation) and [4](#4-public-key-encryption-operations), there are very obvious time differences between different RSA modulus lengths. However, since it is out of the scope of the assignment, it will be acknowledged that there will be very obvious vectors for timing attacks, but no prevention or solution will be implemented.

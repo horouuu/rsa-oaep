@@ -3,7 +3,7 @@ import math
 import secrets
 
 # implementation of mgf1
-def mask(maskLen: int, seed: bytes):
+def _mask(maskLen: int, seed: bytes):
     hash_len = 32
     if (maskLen > 2**32 * hash_len):
         raise ValueError("Specified mask length too long.")
@@ -18,7 +18,7 @@ def mask(maskLen: int, seed: bytes):
     return bytes(M[:maskLen])
 
 # helper function for bitwise XOR
-def xor_bytes(a, b):
+def _xor_bytes(a, b):
     if len(a) != len(b):
         raise ValueError("Length of byte strings a and b must be the same.")
 
@@ -36,8 +36,8 @@ def pad_oaep(message: bytes):
     db = label_hash + ps + b"\x01" + message
 
     seed = secrets.token_bytes(hash_len)
-    masked_db = xor_bytes(db, mask(out_len - hash_len - 1, seed))
-    masked_seed = xor_bytes(seed, mask(hash_len, masked_db))
+    masked_db = _xor_bytes(db, _mask(out_len - hash_len - 1, seed))
+    masked_seed = _xor_bytes(seed, _mask(hash_len, masked_db))
     return b"\x00" + masked_seed + masked_db
 
 def unpad_oaep(padded_msg: bytes):
@@ -47,10 +47,10 @@ def unpad_oaep(padded_msg: bytes):
     masked_seed = padded_msg[1:hash_len+1]
     masked_db = padded_msg[hash_len+1:msg_len]
 
-    seed_mask = mask(hash_len, masked_db)
-    seed = xor_bytes(masked_seed, seed_mask)
-    db_mask = mask(msg_len - hash_len - 1, seed)
-    db = xor_bytes(db_mask, masked_db)
+    seed_mask = _mask(hash_len, masked_db)
+    seed = _xor_bytes(masked_seed, seed_mask)
+    db_mask = _mask(msg_len - hash_len - 1, seed)
+    db = _xor_bytes(db_mask, masked_db)
 
     recovered_label = db[0:hash_len]
     msg_idx = db.find(b"\x01", hash_len)

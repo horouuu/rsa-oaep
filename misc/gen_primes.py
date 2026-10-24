@@ -11,7 +11,7 @@ import time
 
 def gen_test_pairs(key_len: int):
     rsa = RSA(False, key_len)
-    return rsa.get_candidate_pair()
+    return rsa._get_candidate_pair()
 
 if __name__ == '__main__':
     if (len(sys.argv) < 2 or int(sys.argv[1]) < 1):

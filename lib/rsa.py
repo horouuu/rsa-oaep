@@ -2,6 +2,7 @@ import secrets
 import math
 import time
 import lib.oaep as oaep
+import lib.pem as pem
 from lib.primes import test_mr
 from lib.primes import test_composite_small_primes
 
@@ -16,8 +17,13 @@ class RSA:
         self._e = e
 
         self._d = -1
+        self._p = -1
+        self._q = -1
         self._n = -1
         self._totient = -1
+        self._dp = -1
+        self._dq = -1
+        self._qi = -1
 
         self._initialized = False
 
@@ -71,7 +77,7 @@ class RSA:
         primes = list(map(self._get_prime, lens))
         while (primes[0] == primes[1]):
             self._print_log("Somehow managed to generate p == q! Re-generating...")
-            primes = primes = list(map(self._get_prime, lens))
+            primes = list(map(self._get_prime, lens))
 
         t = time.perf_counter() - t
         self._print_log(f"Took {round(t, 2)}s to generate prime pairs p and q.")
@@ -79,7 +85,7 @@ class RSA:
 
 
     def _check_parameters(self):
-        if (any(x == -1 for x in [self._n, self._totient, self._d])):
+        if (any(x == -1 for x in [self._n, self._totient, self._d, self._p, self._q, self._dq, self._dp, self._qi])):
             raise ValueError("Improper setup of RSA parameters.")
         self._print_log("All RSA parameters set up and ready to go.")
         self._print_log(f"RSAES configured as RSA {self._key_len} with EME-OAEP (MGF1; SHA-256).")
@@ -91,9 +97,14 @@ class RSA:
         
         pair = self._get_candidate_pair()
         n = math.prod(pair)
+        self._p = pair[0]
+        self._q = pair[1]
         self._n = n
         self._totient = n - (sum(pair)) + 1
         self._d = pow(self._e, -1, self._totient)
+        self._dp = self._d % (self._p - 1)
+        self._dq = self._d % (self._q - 1)
+        self._qi = pow(self._q, -1, self._p)
 
         self._check_parameters()
 
@@ -110,7 +121,8 @@ class RSA:
         encrypted = pow(int_padded, self._e, self._n)
         return encrypted.to_bytes(self._key_len // 8, byteorder="big")
 
-    def rsaes_decrypt(self, cipher: bytes):
+    def _decrypt_basic(self, cipher: bytes):
+        # benchmark purposes only. not used by default
         if (not self._initialized):
             raise RuntimeError("Must initialize RSA class using initialize_rsa() before attempting decryption.")
         # C ^ d mod n for decryption
@@ -120,3 +132,21 @@ class RSA:
 
         # now unpad with oaep
         return oaep.unpad_oaep(decrpyted_bytes)
+
+    def rsaes_decrypt(self, cipher: bytes):
+        if (not self._initialized):
+            raise RuntimeError("Must initialize RSA class using initialize_rsa() before attempting decryption.")
+        # we use CRT here as prescribed by RFC 8017 5.1.2
+        int_cipher = int.from_bytes(cipher, byteorder="big")
+
+        m1 = pow(int_cipher, self._dp, self._p)
+        m2 = pow(int_cipher, self._dq, self._q)
+        h = (m1 - m2)*self._qi % self._p
+        decrypted = m2 + h*self._q
+        decrpyted_bytes = decrypted.to_bytes(self._key_len // 8, byteorder="big")
+
+        # now unpad with oaep
+        return oaep.unpad_oaep(decrpyted_bytes)
+
+    def serialize_pkcs_8(self):
+        pass

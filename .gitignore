@@ -1,5 +1,7 @@
 __pycache__/
 test.py
 z.py
-misc/avg_primes.py
 todo.md
+
+misc/avg_primes.py
+misc/blinding.py

@@ -2,7 +2,9 @@ import secrets
 import math
 import time
 import lib.oaep as oaep
-import lib.pem as pem
+from lib.pem import sequence
+from lib.pem import integer
+from lib.pem import export_pkcs1
 from lib.primes import test_mr
 from lib.primes import test_composite_small_primes
 
@@ -75,8 +77,11 @@ class RSA:
         self._print_log("Generating prime pairs p and q...")
         t = time.perf_counter()
         primes = list(map(self._get_prime, lens))
-        while (primes[0] == primes[1]):
-            self._print_log("Somehow managed to generate p == q! Re-generating...")
+        while (primes[0] == primes[1] or (abs(primes[0] - primes[1]) <= 2**(self._key_len//2 - 100))):
+            if (primes[0] == primes[1]):
+                self._print_log("Somehow managed to generate p == q! Re-generating...")
+            else:
+                self._print_log("Distance between prime candidates p and q insufficient. Re-generating...")
             primes = list(map(self._get_prime, lens))
 
         t = time.perf_counter() - t
@@ -96,6 +101,7 @@ class RSA:
             return self
         
         pair = self._get_candidate_pair()
+
         n = math.prod(pair)
         self._p = pair[0]
         self._q = pair[1]
@@ -148,5 +154,26 @@ class RSA:
         # now unpad with oaep
         return oaep.unpad_oaep(decrpyted_bytes)
 
-    def serialize_pkcs_8(self):
-        pass
+    def serialize_pkcs_1(self, filename: str):
+        skey_seq = sequence([
+            integer(0), # means two-prime
+            integer(self._n),
+            integer(self._e),
+            integer(self._d),
+            integer(self._p),
+            integer(self._q),
+            integer(self._dp),
+            integer(self._dq),
+            integer(self._qi)
+        ])
+
+        pkey_seq = sequence([
+            integer(self._n),
+            integer(self._e)
+        ])
+
+        export_pkcs1(filename, skey_seq, "private")
+        export_pkcs1(filename, pkey_seq, "public")
+
+
+

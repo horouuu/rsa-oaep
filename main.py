@@ -1,10 +1,9 @@
 from lib.rsa import RSA
 
 if __name__ == '__main__':
-    rsa = RSA(True)
+    rsa = RSA().verbose(True).key_len(2048)
     msg = bytes("HELLO!", 'utf-8')
     rsa.initialize_rsa()
-
 
     # encryption / decryption
     ciphertext = rsa.rsaes_encrypt(msg)
@@ -14,3 +13,5 @@ if __name__ == '__main__':
     print(decrypted)
 
     print(decrypted == msg)
+
+    rsa.serialize_pkcs_1("test")

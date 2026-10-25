@@ -12,6 +12,7 @@
     - Private prime factor $p$ must be selected randomly and must satisfy $\sqrt{2}\cdot 2^{\frac{nlen}{2}-1} \leq p \leq 2^{\frac{nlen}{2}}-1$
     - Private prime factor $q$ must be selected randomly and must satisfy $\sqrt{2}\cdot 2^{\frac{nlen}{2}-1} \leq q \leq 2^{\frac{nlen}{2}}-1$
     - $|p-q| > 2^{\frac{nlen}{2}-100}$
+
 3. (A.1.3) Generation of Random Primes That Are Probably Prime
 
 [RFC 8017](https://www.rfc-editor.org/info/rfc8017/#section-6)
@@ -55,3 +56,51 @@ The mechanism is roughly as follows:
 
 ## Miscellaneous
 List of Mersenne primes taken from [mersenne.org](https://www.mersenne.org/primes/)
+
+### PEM file encoding
+RSA Private Key Syntax ([RFC 8017 Appendix A.1.2](https://www.rfc-editor.org/info/rfc8017/#appendix-A.1.2))
+```
+         RSAPrivateKey ::= SEQUENCE {
+             version           Version,
+             modulus           INTEGER,  -- n
+             publicExponent    INTEGER,  -- e
+             privateExponent   INTEGER,  -- d
+             prime1            INTEGER,  -- p
+             prime2            INTEGER,  -- q
+             exponent1         INTEGER,  -- d mod (p-1)
+             exponent2         INTEGER,  -- d mod (q-1)
+             coefficient       INTEGER,  -- (inverse of q) mod p
+             otherPrimeInfos   OtherPrimeInfos OPTIONAL
+         }
+```
+```
+         RSAPublicKey ::= SEQUENCE {
+             modulus           INTEGER,  -- n
+             publicExponent    INTEGER   -- e
+         }
+```
+
+### DER Tag Octet
+| Class | P/C | Tag number |
+|---|---|---|
+| 2 bits | 1 bit | 5 bits |
+The universal tags below would be encoded into the tag number part (5 LSB).
+
+Reference:
+[ITU-T X.690](https://www.itu.int/rec/T-REC-X.690-202102-I/en) (02/2021), Section 8.1.2, Figure 2
+[ITU-T X.690](https://www.itu.int/rec/T-REC-X.690-202102-I/en) (02/2021), Section 8.1.2, Figure 3
+
+### ASN.1 Universal Tags
+
+| Type | Tag Number | DER Identifier |
+|---|---|---|
+| INTEGER | 2 | 0x02 |
+| BIT STRING | 3 | 0x03 |
+| OCTET STRING | 4 | 0x04 |
+| NULL | 5 | 0x05 |
+| OBJECT IDENTIFIER | 6 | 0x06 |
+| SEQUENCE | 16 | 0x30 |
+| SET | 17 | 0x31 |
+
+Reference:
+[ITU-T X.680](https://www.itu.int/rec/T-REC-X.680-202102-I/en) (02/2021), Section 8, Table 1

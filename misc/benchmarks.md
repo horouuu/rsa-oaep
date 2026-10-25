@@ -20,7 +20,7 @@ The 1-core statistics are an average of 10 executions.
 
 Note that while the script expects up to 16 available cores, an execution with 1 iteration only uses one core.
 
-## 2. Cross-Tests for Primality
+## 2. Cross-tests for primality
 1000 key pairs for RSA 512, 768, 1024, 2048, 3072, and 4096 were generated each and cross-checked with the `.isPrime()` function from SymPy, which implements the Baillie-PSW primality test.
 
 -
@@ -54,6 +54,3 @@ Use the following command to repeat this experiment:
 
 ## 6. PEM serialization and compatibility with OpenSSL
 -
-
-## 7. Possible vectors for timing attack against RSAES using different modulus lengths
-As seen in [3](#3-decryption-with-crt-vs-basic-modulo-exponentiation) and [4](#4-public-key-encryption-operations), there are very obvious time differences between different RSA modulus lengths. However, since it is out of the scope of the assignment, it will be acknowledged that there will be very obvious vectors for timing attacks, but no prevention or solution will be implemented.

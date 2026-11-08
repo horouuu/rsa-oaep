@@ -5,3 +5,6 @@ todo.md
 
 misc/avg_primes.py
 misc/blinding.py
+
+keys/_*
+keys/*.bin

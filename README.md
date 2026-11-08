@@ -60,25 +60,42 @@ List of Mersenne primes taken from [mersenne.org](https://www.mersenne.org/prime
 ### PEM file encoding
 RSA Private Key Syntax ([RFC 8017 Appendix A.1.2](https://www.rfc-editor.org/info/rfc8017/#appendix-A.1.2))
 ```
-         RSAPrivateKey ::= SEQUENCE {
-             version           Version,
-             modulus           INTEGER,  -- n
-             publicExponent    INTEGER,  -- e
-             privateExponent   INTEGER,  -- d
-             prime1            INTEGER,  -- p
-             prime2            INTEGER,  -- q
-             exponent1         INTEGER,  -- d mod (p-1)
-             exponent2         INTEGER,  -- d mod (q-1)
-             coefficient       INTEGER,  -- (inverse of q) mod p
-             otherPrimeInfos   OtherPrimeInfos OPTIONAL
-         }
+RSAPrivateKey ::= SEQUENCE {
+    version           Version,
+    modulus           INTEGER,  -- n
+    publicExponent    INTEGER,  -- e
+    privateExponent   INTEGER,  -- d
+    prime1            INTEGER,  -- p
+    prime2            INTEGER,  -- q
+    exponent1         INTEGER,  -- d mod (p-1)
+    exponent2         INTEGER,  -- d mod (q-1)
+    coefficient       INTEGER,  -- (inverse of q) mod p
+    otherPrimeInfos   OtherPrimeInfos OPTIONAL
+}
 ```
+
 ```
-         RSAPublicKey ::= SEQUENCE {
-             modulus           INTEGER,  -- n
-             publicExponent    INTEGER   -- e
-         }
+RSAPublicKey ::= SEQUENCE {
+    modulus           INTEGER,  -- n
+    publicExponent    INTEGER   -- e
+}
 ```
+
+PrivateKeyInfo (as defined in [RFC 5208 Section 5](https://www.rfc-editor.org/info/rfc5208/#section-5))
+```
+PrivateKeyInfo ::= SEQUENCE {
+  version                   Version,
+  privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
+  privateKey                PrivateKey,
+  attributes           [0]  IMPLICIT Attributes OPTIONAL }
+
+Version ::= INTEGER
+PrivateKeyAlgorithmIdentifier ::= AlgorithmIdentifier
+PrivateKey ::= OCTET STRING
+Attributes ::= SET OF Attribute
+```
+
+OneAsymmetricKey (as defined in [RFC5958 Section 2](https://www.rfc-editor.org/rfc/rfc5958.html#section-2)) will not be included here as v1 (PrivateKeyInfo from RFC 5208) is sufficient for RSAES. The public key information can be retrieved from the private key information.
 
 ### DER Tag Octet
 | Class | P/C | Tag number |

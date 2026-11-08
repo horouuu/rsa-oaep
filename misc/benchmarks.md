@@ -20,7 +20,7 @@ The 1-core statistics are an average of 10 executions.
 
 Note that while the script expects up to 16 available cores, an execution with 1 iteration only uses one core.
 
-## 2. Cross-tests for primality
+## 2. Cross-tests for primality 
 1000 key pairs for RSA 512, 768, 1024, 2048, 3072, and 4096 were generated each and cross-checked with the `.isPrime()` function from SymPy, which implements the Baillie-PSW primality test.
 
 -
@@ -73,7 +73,8 @@ Even at the conjectured upper bound of $N^{0.5}$ stated in Boneh's work, this im
 Note that the statement is **never guaranteed**, and not **guaranteed to never** succeed. However, Boneh states that Wiener's attack against RSA is ineffective for large $d$, so it is highly unlikely to succeed for values of $d$ that exceed the upper bound given.
 
 ## 6. Manger's attack
--
+https://www.iacr.org/archive/crypto2001/21390229.pdf
+Not implemented. Research purposes only.
 
 ## 7. PEM serialization and compatibility with OpenSSL
 The library includes a functionality to serialize generated keys into `.pem` files using ASN.1 DER encoding. The uploaded examples `/keys/test-private.pem` and `/keys/test-public.pem` can be used with and verified using OpenSSL.

@@ -14,4 +14,4 @@ if __name__ == '__main__':
 
     print(decrypted == msg)
 
-    rsa.serialize_pkcs_1("test")
+    rsa.serialize_pkcs_1("_test")

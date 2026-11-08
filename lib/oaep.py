@@ -40,6 +40,9 @@ def pad_oaep(message: bytes, out_len: bytes):
     return b"\x00" + masked_seed + masked_db
 
 def unpad_oaep(padded_msg: bytes):
+    if (padded_msg[0] != 0):
+        raise ValueError("Leading byte not zero")
+
     label_hash = hashlib.sha256(b"").digest()
     msg_len = len(padded_msg)
     hash_len = 32

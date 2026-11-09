@@ -20,6 +20,33 @@ def test_oaep_correctness():
     print("SUCCESS: Correctness")
     print_separator()
 
+def test_oaep_rejection():
+    print_separator()
+    print("Testing OAEP rejections")
+    msg = b"HELLO"
+    print(f"Encoding message: {msg} with OAEP..")
+    enc = pad_oaep(msg, 256)
+    print(f"Testing for rejection vector 1: initial zero-byte")
+    nozero = bytes(0x11) + enc[1:]
+
+    try:
+        unpad_oaep(nozero)
+        raise AssertionError("OAEP did not reject an encoded value with missing/corrupted zero-bytes.")
+    except ValueError:
+        print("OAEP successfully rejected message with missing/corrupted zero-bytes.")
+
+    print("Now testing corruption of every bit...")
+    for i in range(2048):
+        corrupted = (int.from_bytes(enc) ^ (1 << i)).to_bytes(len(enc), "big")
+        try:
+            unpad_oaep(corrupted)
+            raise AssertionError("OAEP did not reject an encoded value with missing/corrupted bits.")
+        except ValueError:
+            pass
+    print("OAEP successfully rejected corruption of every single bit.")
+    print("SUCCESS: OAEP Rejection")
+    print_separator()
+
 def test_oaep_randomness():
     print_separator()
     print('Running EME-OAEP twice with message "Konchikuwa"')
@@ -83,15 +110,13 @@ def test_oaep_var_length_correctness():
 def test_oaep():
     print("STARTING TESTS FOR OAEP")
     test_oaep_correctness()
+    test_oaep_rejection()
     test_oaep_randomness()
     test_oaep_shape()
     test_oaep_var_length_correctness()
 
     print("OAEP: Passed all tests")
     print_separator()
-
-test_oaep()
-
 
 from lib.primes import get_mr_rounds
 from lib.primes import test_mr
@@ -150,8 +175,6 @@ def test_primes():
     print("Primes: Passed all tests")
     print_separator()
 
-test_primes()
-
 from lib.rsa import RSA
 
 def test_rsa_correctness():
@@ -200,8 +223,6 @@ def test_rsa():
     test_rsa_randomness()
     print("RSA: Passed all tests")
     print_separator()
-
-test_rsa()
 
 def cleanup_test_keys(keys: list[Path]):
     for key in keys:
@@ -280,4 +301,12 @@ def test_pem():
     print("PEM: Passed all tests")
     print_separator()
 
+test_oaep()
+test_primes()
+test_rsa()
 test_pem()
+print("Done:")
+print("OAEP - PASSED")
+print("Primes - PASSED")
+print("RSA - PASSED")
+print("PEM - PASSED")

@@ -5,6 +5,7 @@ import lib.oaep as oaep
 from lib.pem import sequence
 from lib.pem import integer
 from lib.pem import export_pkcs1
+from lib.pem import import_pkcs1
 from lib.primes import test_mr
 from lib.primes import test_composite_small_primes
 
@@ -175,5 +176,68 @@ class RSA:
         export_pkcs1(filename, skey_seq, "private")
         export_pkcs1(filename, pkey_seq, "public")
 
+    def _import_pkcs1_private_key(self, filename: str):
+        key_type, params = import_pkcs1(filename)
+        if (key_type != "private"):
+            raise ValueError(f"Check your files! {filename} is a public key, not a private key!")
+        
+        modulus = params[1]
+        self._set_key_len(int.bit_length(modulus))
+        self._n = modulus
 
+        p = params[4]
+        self._p = p
 
+        q = params[5]
+        self._q = q
+
+        if (p * q != modulus):
+            raise ValueError("Prime pairs p and q in imported key do not form the modulus n.")
+
+        self._totient = modulus - sum([p, q]) + 1
+
+        e = params[2]
+        self._e = e
+
+        if (e <= 1 or e >= modulus):
+            raise ValueError("Public exponent in imported key outside of acceptable range.")
+
+        if (e % 2 == 0):
+            raise ValueError("Even public exponent found in imported key.")
+
+        d = params[3]
+        self._d = d
+
+        if ((e * d) % self._totient != 1):
+            raise ValueError("Public and private exponents in imported key are not modular inverses.")
+
+        dp = params[6]
+        self._dp = dp
+
+        dq = params[7]
+        self._dq = dq
+
+        if (dp != d % (p-1)):
+            raise ValueError("Incorrect dp in imported key.")
+
+        if (dq != d % (q-1)):
+            raise ValueError("Incorrect dq in imported key.")
+
+        qi = params[8]
+        self._qi = qi
+
+        if (qi != pow(q, -1, p)):
+            raise ValueError("qi in imported key not modular inverse of q mod p.")
+
+        print(f"Successfully imported private key from file: {filename}.")
+        print("Note that you are RESPONSIBLE for having generated this key from a trusted source.")
+        print("There are no checks for the values of p, q, and n except for the fact that they are mathematically sound, NOT cryptographically.")
+
+    def _import_pkcs1_public_key(self, filename: str):
+        pass
+
+    def _set_key_len(self, key_len: int):
+        if (key_len < 1024):
+            raise ValueError("Key lengths below 1024 cannot be used as the EME-OAEP used in this implementation uses SHA-256.")
+
+        self.key_len = key_len

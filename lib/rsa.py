@@ -6,7 +6,7 @@ import lib.oaep as oaep
 from lib.pem import sequence
 from lib.pem import integer
 from lib.pem import export_pkcs1
-from lib.pem import import_pkcs1
+from lib.pem import import_pkcs
 from lib.primes import test_mr
 from lib.primes import test_composite_small_primes
 
@@ -45,7 +45,7 @@ class RSA:
 
     def _print_log(self, msg: str, newline: bool=False):
         if (self._verbose):
-            print(msg, end="\n" + "\n"*newline)
+            print("[LOG] "+msg, end="\n" + "\n"*newline)
 
     def _gen_bits(self, bits):
         r = secrets.randbits(bits) | 0b11 << (bits-2) | 0b1
@@ -177,8 +177,8 @@ class RSA:
         export_pkcs1(filename, skey_seq, "private")
         export_pkcs1(filename, pkey_seq, "public")
 
-    def _import_pkcs1_private_key(self, filename: str):
-        key_type, params = import_pkcs1(filename)
+    def _import_private_key(self, filename: str, encoding: Literal["pkcs1"] | Literal["pkcs8"]):
+        key_type, params = import_pkcs(filename, encoding)
         if (key_type != "private"):
             raise ValueError(f"Check your files! {filename} is a public key, not a private key!")
         
@@ -209,7 +209,8 @@ class RSA:
         d = params[3]
         self._d = d
 
-        if ((e * d) % self._totient != 1):
+        # need to support carmichael's function here for OpenSSL compatibility
+        if ((e * d) % self._totient != 1) and ((e * d) % math.lcm(self._p -1, self._q - 1) != 1):
             raise ValueError("Public and private exponents in imported key are not modular inverses.")
 
         dp = params[6]
@@ -234,8 +235,8 @@ class RSA:
         print("[*] Note that you are RESPONSIBLE for having generated this key from a trusted source.")
         print("[*] There are no checks for the values of p, q, and n except for the fact that they are mathematically sound, NOT cryptographically.\n")
 
-    def _verify_pkcs1_public_key(self, filename: str):
-        key_type, params = import_pkcs1(filename)
+    def _verify_pkcs1_public_key(self, filename: str, encoding: Literal["pkcs1"] | Literal["pkcs8"]):
+        key_type, params = import_pkcs(filename, encoding)
         if (key_type != "public"):
             raise ValueError(f"Check your files! {filename} is a private key, not a public key!")
 
@@ -254,12 +255,11 @@ class RSA:
         self.key_len = key_len
 
     def import_key(self, key_type: Literal["pkcs1"] | Literal["pkcs8"], sk_filename: str, pk_filename: str=""):
-        if(key_type.lower() != ("pkcs1" or "pkcs8")):
+        if ((key_type.lower() != "pkcs1") and (key_type.lower() != "pkcs8")):
             raise ValueError("You must specify a key type of PKCS1 or PKCS8.")
 
-        if (key_type.lower() == "pkcs1"):
-            self._import_pkcs1_private_key(sk_filename)
-            if (pk_filename):
-                self._verify_pkcs1_public_key(pk_filename)
+        self._import_private_key(sk_filename, key_type)
+        if (pk_filename):
+            self._verify_pkcs1_public_key(pk_filename, key_type)
 
         self._initialized = True

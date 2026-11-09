@@ -12,26 +12,28 @@ if __name__ == '__main__':
 
     rsa = RSA().verbose(True).key_len(2048)
 
-    rsa.import_key("pkcs1", "test-private.pem", "test-public.pem")
+    # rsa.import_key("pkcs1", "test-ssl-private.pem", "test-ssl-public.pem")
+    rsa.import_key("pkcs8", "test-pkcs8-ssl-private.pem", "test-pkcs8-ssl-public.pem")
     rsa.initialize_rsa()
 
     m = bytes("HELLO!", 'utf-8')
     c = rsa.rsaes_encrypt(m)
     d = rsa.rsaes_decrypt(c)
 
-    # print(c) # <--- This will definitely pollute your terminal, but you can uncomment it if interested.
-    print(d)
+    # print("[*] Encrypted bytes:", c) # <--- This will definitely pollute your terminal, but you can uncomment it if interested.
+    print("[*] Decrypted bytes:", d)
 
     ###
     # Feel free to try out the rest of the library.
     # In general, functions without an underscore (_) are meant for public use.
     # You should only ever need the following:
     #
+    # rsa.verbose(bool)
+    # rsa.key_len(len)
     # rsa.initialize_rsa()
     # rsa.rsaes_encrypt(msg_bytes)
     # rsa.rsaes_decrypt(ciphertext_bytes)
     # rsa.import_key(pkcs_type, pk_filename, sk_filename (optional))
-    # rsa.verbose(bool)
-    # rsa.key_len(len)
+    # rsa.serialize_pkcs1(filename)
     #
     # But, you're free to use the internal functions as needed, too.

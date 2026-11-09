@@ -9,6 +9,7 @@ ASN1_TAGS: dict[str, int] = {
     "NULL": 0x05,
     "OBJECT_IDENTIFIER": 0x06,
     "SEQUENCE": 0x30,
+    "BIT_STRING": 0x03
 }
 
 def get_tag(tag_class: int, constructed: int, tag_number: int):
@@ -65,25 +66,22 @@ def export_pkcs1(filename: str, seq_bytes: bytes, key_type: Literal["private", "
     with open(OUT_DIR / f"{filename}-{key_type}.pem", "w") as f:
         f.write(pem)
 
-def import_pkcs8(filename: str):
+def import_pkcs(filename: str, encoding: Literal["pkcs1"] | Literal["pkcs8"]) -> list[int]:
     # limit scope to /keys in project root
     OUT_DIR = Path(__file__).resolve().parent.parent / "keys"
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(OUT_DIR / filename, "r") as f:
         pem = f.read()
 
-    base64str = "".join(pem.split("\n")[1:-1])
+    base64str = "".join(pem.strip().split("\n")[1:-1])
     decoded = base64.b64decode(base64str)
-
-def import_pkcs1(filename: str) -> list[int]:
-    OUT_DIR = Path(__file__).resolve().parent.parent / "keys"
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    with open(OUT_DIR / filename, "r") as f:
-        pem = f.read()
-
-    base64str = "".join(pem.split("\n")[1:-1])
-    decoded = base64.b64decode(base64str)
-    key_type, content = parse_pkcs1(decoded)
+    if (encoding.lower() == "pkcs1"):
+        key_type, content = parse_pkcs1(decoded)
+    elif (encoding.lower() == "pkcs8"):
+        key_type, content = parse_pkcs8(decoded)
+    else:
+        raise ValueError(f"Unexpected key encoding {encoding}")
+    
     parsed = [int.from_bytes(b, "big") for b in content]
 
     return key_type, parsed
@@ -111,7 +109,7 @@ def parse_pkcs1(seq: bytes):
 def parse_tlv(tlv_bytes: bytes, code: int):
     parsed_code = tlv_bytes[0]
     if (parsed_code != code):
-        raise ValueError(f"Unexpected code: {parsed_code.to_bytes().hex} (should be {code.to_bytes().hex})")
+        raise ValueError(f"Unexpected code: {parsed_code.to_bytes().hex()} (should be {code.to_bytes().hex()})")
 
     content_bytes = parse_len(tlv_bytes[1:])
     return content_bytes
@@ -130,3 +128,33 @@ def parse_len(len_bytes: bytes):
     seq_bytes = len_bytes[start:start+len]
 
     return seq_bytes, len_bytes[start+len:]
+
+def parse_pkcs8(seq: bytes):
+    content, _ = parse_tlv(seq, ASN1_TAGS["SEQUENCE"])
+
+    # public keys don't have the VERSION TLV here
+    if (content[0] == ASN1_TAGS["INTEGER"]):
+        version, nxt = parse_tlv(content, ASN1_TAGS["INTEGER"])
+        if (int.from_bytes(version) != 0):
+            raise ValueError("RSA private keys with versions other than 0 are not supported by this library.")
+        alg_cont, nxt = parse_tlv(nxt, ASN1_TAGS["SEQUENCE"])
+    else:
+        alg_cont, nxt = parse_tlv(content, ASN1_TAGS["SEQUENCE"])
+
+    obj, nxt_alg = parse_tlv(alg_cont, ASN1_TAGS["OBJECT_IDENTIFIER"])
+    null, nxt_alg = parse_tlv(nxt_alg, ASN1_TAGS["NULL"])
+    
+    if (obj.hex() != "2a864886f70d010101"):
+        raise ValueError("Algorithm type in imported key is not RSA (1.2.840.113549.1.1.1 / 2a864886f70d010101).")
+
+    if (null):
+        raise ValueError("Null parameter contained other, valid bytes.")
+
+    if (nxt[0] == ASN1_TAGS["BIT_STRING"]):
+        rsa_content, nxt = parse_tlv(nxt, ASN1_TAGS["BIT_STRING"])
+        rsa_content = rsa_content[1:]
+    else:
+        rsa_content, nxt = parse_tlv(nxt, ASN1_TAGS["OCTET_STRING"])
+
+    print(rsa_content)
+    return parse_pkcs1(rsa_content)

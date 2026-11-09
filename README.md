@@ -44,7 +44,7 @@ Flags:
 ### Key generation
 Generates and exports a pair of keys. \
 This command will default to RSA-2048 keys.
-`python3 -m genkeys`
+`python3 -m gen-keys`
 Note that the keys generated from here will be put in `/keys`. \
 It is not recommended to change this behavior.
 

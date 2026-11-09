@@ -31,5 +31,7 @@ if __name__ == '__main__':
     # rsa.rsaes_encrypt(msg_bytes)
     # rsa.rsaes_decrypt(ciphertext_bytes)
     # rsa.import_key(pkcs_type, pk_filename, sk_filename (optional))
+    # rsa.verbose(bool)
+    # rsa.key_len(len)
     #
     # But, you're free to use the internal functions as needed, too.

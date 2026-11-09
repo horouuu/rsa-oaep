@@ -41,7 +41,7 @@ def pad_oaep(message: bytes, out_len: bytes):
 
 def unpad_oaep(padded_msg: bytes):
     if (padded_msg[0] != 0):
-        raise ValueError("Leading byte not zero")
+        raise ValueError("Leading byte not zero or wrong key used for decryption.")
 
     label_hash = hashlib.sha256(b"").digest()
     msg_len = len(padded_msg)

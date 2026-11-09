@@ -101,6 +101,9 @@ class RSA:
         if (self._initialized):
             self._print_log("Object has already been initialized. Skipping initialization..")
             return self
+
+        if (self._n != -1):
+            raise ValueError("This object has already been used to import a public key. Create a new object instead of re-initializing.")
         
         pair = self._get_candidate_pair()
 
@@ -119,8 +122,8 @@ class RSA:
         self._initialized = True
         return self
 
-    def rsaes_encrypt(self, msg: bytes):
-        if (not self._initialized):
+    def rsaes_encrypt(self, msg: bytes, pem: bool=False):
+        if (not self._initialized and not pem):
             raise RuntimeError("Must initialize RSA class using initialize_rsa() before attempting encryption.")
         # M ^ e mod n for encryption
         # pad with oaep first
@@ -136,14 +139,15 @@ class RSA:
         # C ^ d mod n for decryption
         int_cipher = int.from_bytes(cipher, byteorder="big")
         decrypted = pow(int_cipher, self._d, self._n)
-        decrpyted_bytes = decrypted.to_bytes(self._key_len // 8, byteorder="big")
+        decrypted_bytes = decrypted.to_bytes(self._key_len // 8, byteorder="big")
 
         # now unpad with oaep
-        return oaep.unpad_oaep(decrpyted_bytes)
+        return oaep.unpad_oaep(decrypted_bytes)
 
     def rsaes_decrypt(self, cipher: bytes):
         if (not self._initialized):
-            raise RuntimeError("Must initialize RSA class using initialize_rsa() before attempting decryption.")
+            raise RuntimeError("Must initialize RSA class using initialize_rsa() or importing a private key before attempting decryption.")
+        
         # we use CRT here as prescribed by RFC 8017 5.1.2
         int_cipher = int.from_bytes(cipher, byteorder="big")
 
@@ -151,10 +155,10 @@ class RSA:
         m2 = pow(int_cipher, self._dq, self._q)
         h = (m1 - m2)*self._qi % self._p
         decrypted = m2 + h*self._q
-        decrpyted_bytes = decrypted.to_bytes(self._key_len // 8, byteorder="big")
+        decrypted_bytes = decrypted.to_bytes(self._key_len // 8, byteorder="big")
 
         # now unpad with oaep
-        return oaep.unpad_oaep(decrpyted_bytes)
+        return oaep.unpad_oaep(decrypted_bytes)
 
     def serialize_pkcs_1(self, filename: str):
         skey_seq = sequence([
@@ -263,3 +267,44 @@ class RSA:
             self._verify_pkcs1_public_key(pk_filename, key_type)
 
         self._initialized = True
+
+    def encrypt_from_pem(self, key_type: Literal["pkcs1"] | Literal["pkcs8"], pk_filename: str, plaintext_filepath: str):
+        if (self._initialized):
+            self._print_log("WARNING: This object is initialized. If you meant to use the initialized settings instead, please use the rsa.rsaes_encrypt() function directly.")
+
+        rsa_key_type, params = import_pkcs(pk_filename, key_type)
+        if (rsa_key_type != "public"):
+            raise ValueError("Imported key is not an RSA public key.")
+
+        n, e = params
+        self._n = n
+        self._e = e
+
+        with open(plaintext_filepath, "r") as f:
+            plaintext = f.read()
+
+        ciphertext = self.rsaes_encrypt(plaintext.encode("utf-8"), True)
+        
+        with open(f"{plaintext_filepath}.bin", "wb") as f:
+            f.write(ciphertext)
+
+    def encrypt_file(self, plaintext_filepath: str):
+        with open(plaintext_filepath, "r") as f:
+            plaintext = f.read()
+
+        ciphertext = self.rsaes_encrypt(plaintext.encode("utf-8"))
+        
+        with open(f"{plaintext_filepath}.bin", "wb") as f:
+            f.write(ciphertext)
+
+        f.close()
+
+    def decrypt_file(self, ciphertext_filepath: str):
+        with open(ciphertext_filepath, "rb") as f:
+            ciphertext = f.read()
+
+        plaintext = self.rsaes_decrypt(ciphertext)
+        with open(f"{ciphertext_filepath}-decrypted", "wb") as f:
+            f.write(plaintext)
+
+        f.close()

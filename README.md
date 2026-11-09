@@ -12,7 +12,6 @@ The `/keys` folder come with pre-generated keys, and any further keys generated 
 - This library generates **ONLY PKCS #1 keys**. 
 
 ## Content
-[Prepared CLI commands]()
 [Module CLI commands](#module-cli-commands)
 [Directory Layout](#directory)
 [Benchmarks](./misc/benchmarks.md)

@@ -156,5 +156,4 @@ def parse_pkcs8(seq: bytes):
     else:
         rsa_content, nxt = parse_tlv(nxt, ASN1_TAGS["OCTET_STRING"])
 
-    print(rsa_content)
     return parse_pkcs1(rsa_content)

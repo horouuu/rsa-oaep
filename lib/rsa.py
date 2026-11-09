@@ -1,6 +1,7 @@
 import secrets
 import math
 import time
+from typing import Literal
 import lib.oaep as oaep
 from lib.pem import sequence
 from lib.pem import integer
@@ -229,15 +230,36 @@ class RSA:
         if (qi != pow(q, -1, p)):
             raise ValueError("qi in imported key not modular inverse of q mod p.")
 
-        print(f"Successfully imported private key from file: {filename}.")
-        print("Note that you are RESPONSIBLE for having generated this key from a trusted source.")
-        print("There are no checks for the values of p, q, and n except for the fact that they are mathematically sound, NOT cryptographically.")
+        print(f"[*] Successfully imported private key from file: {filename}.")
+        print("[*] Note that you are RESPONSIBLE for having generated this key from a trusted source.")
+        print("[*] There are no checks for the values of p, q, and n except for the fact that they are mathematically sound, NOT cryptographically.\n")
 
-    def _import_pkcs1_public_key(self, filename: str):
-        pass
+    def _verify_pkcs1_public_key(self, filename: str):
+        key_type, params = import_pkcs1(filename)
+        if (key_type != "public"):
+            raise ValueError(f"Check your files! {filename} is a private key, not a public key!")
+
+        modulus, e = params
+
+        if (modulus != self._n or e != self._e):
+            raise ValueError("Modulus or public exponent value in imported key do not match previously imported private key or current settings.")
+
+        print(f"[*] Public key {filename} matches currently loaded settings.\n")
+        
 
     def _set_key_len(self, key_len: int):
         if (key_len < 1024):
             raise ValueError("Key lengths below 1024 cannot be used as the EME-OAEP used in this implementation uses SHA-256.")
 
         self.key_len = key_len
+
+    def import_key(self, key_type: Literal["pkcs1"] | Literal["pkcs8"], sk_filename: str, pk_filename: str=""):
+        if(key_type.lower() != ("pkcs1" or "pkcs8")):
+            raise ValueError("You must specify a key type of PKCS1 or PKCS8.")
+
+        if (key_type.lower() == "pkcs1"):
+            self._import_pkcs1_private_key(sk_filename)
+            if (pk_filename):
+                self._verify_pkcs1_public_key(pk_filename)
+
+        self._initialized = True

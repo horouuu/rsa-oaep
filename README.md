@@ -17,7 +17,8 @@ This library generates **ONLY PKCS #1 keys**.
 [Resources/Infodump](./info.md)
 
 ## Module CLI Commands
-Some functionalities have been packaged as CLI commands for those not looking to interact with the source code.
+Some functionalities have been packaged as CLI commands for those not looking to interact with the source code. \
+All commands here take the `-v` `--verbose` flag for logging. This will print a LOT of things to your terminal if you enable key generation.
 
 ### Encryption with PEM key
 Produces a binary of the encrypted plaintext file using a supplied key.

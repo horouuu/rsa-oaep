@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     rsa = RSA().verbose(True).key_len(2048)
 
-    rsa.import_key("pkcs1", "_ssl-private.pem", "_ssl-public.pem")
+    rsa.import_key("pkcs1", "test-private.pem", "test-public.pem")
     rsa.initialize_rsa()
 
     m = bytes("HELLO!", 'utf-8')

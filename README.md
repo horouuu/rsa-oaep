@@ -12,7 +12,9 @@ The `/keys` folder come with pre-generated keys, and any further keys generated 
 - This library generates **ONLY PKCS #1 keys**. 
 
 ## Content
+[Prepared CLI commands]()
 [Module CLI commands](#module-cli-commands)
+[Directory Layout](#directory)
 [Benchmarks](./misc/benchmarks.md)
 [Resources/Infodump](./info.md)
 
@@ -58,3 +60,43 @@ Optional flags
 - `-n` Changes the modulus size.
 - `-k` Specifies key name. Defaults to current date.
 - `-v` Prints RSA-related logs.
+
+## Libraries Used
+The project uses strictly built-in Python libraries for Python 3.14 and above. \
+This project was built on Python 3.14.7, but 3.9+ may work.
+
+| No | Module | Purpose |
+|---|---|---|
+| 1 | `math` | Mathematical operations such as modular exponentiation |
+| 2 | `time` | Benchmarking |
+| 3 | `secrets` | Strictly CSPRNG |
+| 4 | `base64` | PEM Serialization |
+| 5 | `pathlib` | PEM Serialization |
+| 6 | `hashlib` | SHA-256 |
+| 7 | `datetime`, `sys`, `argparse` | CLI module |
+
+## Directory
+```
+├── keys
+│   └── .test
+├── lib
+└── misc
+    └── out
+```
+- `/`
+The root directory. Contains all README files and CLI module files.
+
+- `/lib`
+Source code of the project. All relevant source code other than the CLI wrappers is contained here.
+
+- `/keys`
+Default directory for importing and exporting keys. It is not recommended to change this in the source code to avoid mixing up keys.
+
+- `/keys/.test`
+Pre-generated keys. Also used in `/misc/tests.py`. Do not remove.
+
+- `/misc`
+Contains all tests and benchmarks. They can be executed similarly to the CLI commands using `python3 -m misc.[name]`
+
+- `/misc/out`
+Contains a collection of 1000 prime pairs for RSA 512 through RSA 4096.

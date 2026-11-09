@@ -268,6 +268,8 @@ class RSA:
 
         self._initialized = True
 
+        return self
+
     def encrypt_from_pem(self, key_type: Literal["pkcs1"] | Literal["pkcs8"], pk_filename: str, plaintext_filepath: str):
         if (self._initialized):
             self._print_log("WARNING: This object is initialized. If you meant to use the initialized settings instead, please use the rsa.rsaes_encrypt() function directly.")

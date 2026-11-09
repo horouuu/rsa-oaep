@@ -1,5 +1,7 @@
 from lib.oaep import pad_oaep
 from lib.oaep import unpad_oaep
+from uuid import uuid4
+from pathlib import Path
 
 def print_separator():
     print("------------------------------------------")
@@ -148,7 +150,7 @@ def test_primes():
     print("Primes: Passed all tests")
     print_separator()
 
-# test_primes()
+test_primes()
 
 from lib.rsa import RSA
 
@@ -200,3 +202,82 @@ def test_rsa():
     print_separator()
 
 test_rsa()
+
+def cleanup_test_keys(keys: list[Path]):
+    for key in keys:
+        key = Path(__file__).resolve().parent / ".." / "keys" / key
+        Path(str(key) + "-public.pem").unlink()
+        Path(str(key) + "-private.pem").unlink()
+        print(f"[CLEANUP] Deleted key pair {key}")
+
+def test_key_correctness():
+    print_separator()
+    print("Testing two PKCS #1-serialized RSA-1024 keys for correctness...")
+    msg = b"HELLO THERE!"
+    print(f"Message: {msg}")
+
+    rsa1_name = str(uuid4())
+    rsa2_name = str(uuid4())
+    keys = [rsa1_name, rsa2_name]
+
+    try:
+        rsa1 = RSA().key_len(1024).initialize_rsa()
+        rsa1.serialize_pkcs_1(str(rsa1_name))
+
+        rsa2 = RSA().key_len(1024).initialize_rsa()
+        rsa2.serialize_pkcs_1(str(rsa2_name))
+
+        rsa1_test = RSA().key_len(1024).import_key("pkcs1", str(rsa1_name) + "-private.pem")
+        rsa2_test = RSA().key_len(1024).import_key("pkcs1", str(rsa2_name) + "-private.pem")
+
+        print("Successfully serialized and re-imported both keys.")
+
+        rsa1_cipher = rsa1.rsaes_encrypt(msg)
+        rsa2_cipher = rsa2.rsaes_encrypt(msg)
+
+        rsa1_decrypt = rsa1_test.rsaes_decrypt(rsa1_cipher)
+        rsa2_decrypt = rsa2_test.rsaes_decrypt(rsa2_cipher)
+
+        if (rsa1_decrypt != msg):
+            cleanup_test_keys(keys)
+            raise AssertionError("First RSA-1024 key failed to decrypt ciphertext correctly.")
+
+        if (rsa2_decrypt != msg):
+            cleanup_test_keys(keys)
+            raise AssertionError("Second RSA-1024 key failed to decrypt ciphertext correctly.")
+
+        print(f"Success! Both RSA-1024 keys resolved the message: {msg}")
+        print(f"PKCS #1 import/export also validated")
+    finally:
+        cleanup_test_keys(keys)
+        print_separator()
+
+def test_pkcs8_import():
+    print_separator()
+    print("Testing import and compatibility of pre-generated OpenSSL PKCS #8 key...")
+    priv = Path(".test") / "test-pkcs8-ssl-private.pem"
+    pub = Path(".test") / "test-pkcs8-ssl-public.pem"
+    keys = [str(k) for k in [priv, pub]]
+
+    msg = b"HEEEEEELLLLLOOOOOOO!!"
+
+    print(f"Attempting encryption and decryption with message: {msg}")
+
+    rsa = RSA().import_key("pkcs8", keys[0], keys[1])
+    c = rsa.rsaes_encrypt(msg)
+    d = rsa.rsaes_decrypt(c)
+
+    if (d != msg):
+        raise AssertionError(f"PKCS #8 key {keys[pub]}/{keys[priv]} failed to encrypt/decrypt message {msg}")
+    else:
+        print(f"Successfully encrypted/decrypted message {msg}")
+
+    print_separator()
+
+def test_pem():
+    test_key_correctness()
+    test_pkcs8_import()
+    print("PEM: Passed all tests")
+    print_separator()
+
+test_pem()

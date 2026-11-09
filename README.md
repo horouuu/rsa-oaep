@@ -38,9 +38,16 @@ Generates keys, encrypts the file, and exports the keys.
 Note that the keys generated from here will be put in `/keys`. \
 It is not recommended to change this behavior.
 
+Flags:
+- `k` - Specifies key name. Defaults to current date.
+
 ### Key generation
-Generates and exports a pair of keys for RSA-`[modulus_length]`. \
+Generates and exports a pair of keys. \
 This command will default to RSA-2048 keys.
-`python3 -m genkeys [key_name] -n [modulus_length]`
+`python3 -m genkeys`
 Note that the keys generated from here will be put in `/keys`. \
 It is not recommended to change this behavior.
+
+Flags
+- `-n` Changes the modulus size.
+- `-k` Specifies key name. Defaults to current date.

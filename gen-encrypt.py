@@ -1,6 +1,6 @@
 import sys
 import argparse
-import datetime
+from datetime import datetime
 from lib.rsa import RSA
 from pathlib import Path
 from lib.prints import print_log
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     key_name = args.key
     if (not key_name):
-        key_name = datetime.date.today().isoformat()
+        key_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     plaintext_path = Path(args.plain)
 

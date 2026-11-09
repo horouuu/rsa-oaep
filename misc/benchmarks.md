@@ -21,9 +21,7 @@ The 1-core statistics are an average of 10 executions.
 Note that while the script expects up to 16 available cores, an execution with 1 iteration only uses one core.
 
 ## 2. Cross-tests for primality 
-1000 key pairs for RSA 512, 768, 1024, 2048, 3072, and 4096 were generated each and cross-checked with the `.isPrime()` function from SymPy, which implements the Baillie-PSW primality test.
-
--
+1000 key pairs for RSA 512, 768, 1024, 2048, 3072, and 4096 were generated each and cross-checked with the `prime` command from OpenSSL, which implements several tests, including Miller-Rabin.
 
 ## 3. Decryption with CRT vs. basic modulo exponentiation
 The modulus lengths 1024, 2048, and 4096 were chosen to test the time saved from switching to CRT decryption. The results were as follows:
